@@ -19,6 +19,12 @@ const clientScalar: AxiosInstance = axios.create({
   timeout: 3000,
   headers: { 'Content-Type': 'application/json' },
 });
+const adapterVector = 'http://adapter-vector.default.svc.cluster.local';
+const clientVector: AxiosInstance = axios.create({
+  baseURL: adapterVector,
+  timeout: 3000,
+  headers: { 'Content-Type': 'application/json' },
+});
 
 // Create Express server
 const app = express();
@@ -34,8 +40,10 @@ app.get('/export/json/raw/:timeseriesId', async (req: Request, res: Response) =>
     console.log('timeseriesId: ', req.params.timeseriesId);
     const resp: AxiosResponse = await clientMetadata.get(`/timeseries/${timeseriesId}`);
     const metadataIds: MetadataIds = metadataIdsDecoder.runWithException(resp.data);
-    if (metadataIds.valueType === ValueType.Scalar) {
-      const result: AxiosResponse = await clientScalar.get(`timeseries/${timeseriesId}`);
+    if (metadataIds.valueType === ValueType.Scalar || metadataIds.valueType === ValueType.Vector) {
+      const result: AxiosResponse = (metadataIds.valueType === ValueType.Scalar) ?
+        await clientScalar.get(`timeseries/${timeseriesId}`) :
+        await clientVector.get(`timeseries/${timeseriesId}`);
       res.status(result.status).send(result.data);
     } else {
       res.status(400).send(`Unknown Value Type: ${metadataIds.valueType}`);
