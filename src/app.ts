@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 
+import crypto from 'crypto';
 import express from "express";
 import compression from "compression";  // compresses requests
 import expressValidator from "express-validator";
 import bodyParser from "body-parser";
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { MetadataIds, metadataIdsDecoder, ValueType } from './types';
+import util from './config/util';
 
 const adapterMetadata = 'http://adapter-metadata.default.svc.cluster.local';
 const clientMetadata: AxiosInstance = axios.create({
@@ -40,10 +42,14 @@ app.get('/export/json/raw/:timeseriesId', async (req: Request, res: Response) =>
     console.log('timeseriesId: ', req.params.timeseriesId);
     const resp: AxiosResponse = await clientMetadata.get(`/timeseries/${timeseriesId}`);
     const metadataIds: MetadataIds = metadataIdsDecoder.runWithException(resp.data);
+    const requestId: string = crypto.randomBytes(16).toString('hex');
     if (metadataIds.valueType === ValueType.Scalar || metadataIds.valueType === ValueType.Vector) {
+      const start: string = req.query.start;
+      const end: string = req.query.end;
+      const q: string = `requestId=${requestId}${util.queryParam('start', start)}${util.queryParam('end', end)}`
       const result: AxiosResponse = (metadataIds.valueType === ValueType.Scalar) ?
-        await clientScalar.get(`timeseries/${timeseriesId}`) :
-        await clientVector.get(`timeseries/${timeseriesId}`);
+        await clientScalar.get(`timeseries/${timeseriesId}?${q}`) :
+        await clientVector.get(`timeseries/${timeseriesId}?${q}`);
       res.status(result.status).send(result.data);
     } else {
       res.status(400).send(`Unknown Value Type: ${metadataIds.valueType}`);
