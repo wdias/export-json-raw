@@ -59,7 +59,7 @@ app.get('/export/json/raw/:timeseriesId', async (req: Request, res: Response) =>
   }
 });
 
-app.get('/import/public/hc', (req: Request, res: Response) => {
+app.get('/export/json/raw/public/hc', (req: Request, res: Response) => {
   console.log('Import Health Check 1');
   res.send('OK');
 });
