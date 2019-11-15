@@ -12,19 +12,19 @@ import util from './config/util';
 const adapterMetadata = 'http://adapter-metadata.default.svc.cluster.local';
 const clientMetadata: AxiosInstance = axios.create({
   baseURL: adapterMetadata,
-  timeout: 3000,
+  timeout: 5000,
   headers: { 'Content-Type': 'application/json' },
 });
 const adapterScalar = 'http://adapter-scalar.default.svc.cluster.local';
 const clientScalar: AxiosInstance = axios.create({
   baseURL: adapterScalar,
-  timeout: 3000,
+  timeout: 5000,
   headers: { 'Content-Type': 'application/json' },
 });
 const adapterVector = 'http://adapter-vector.default.svc.cluster.local';
 const clientVector: AxiosInstance = axios.create({
   baseURL: adapterVector,
-  timeout: 3000,
+  timeout: 5000,
   headers: { 'Content-Type': 'application/json' },
 });
 
